@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla de Bienvenida</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: center;
+        }
+        .header {
+            background-color: #5b7d8a;
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button-grid button {
+            background-color: #1e3b54;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button-grid button:hover {
+            background-color: #163046;
+        }
+        .top-right-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .top-right-buttons button {
+            background-color: #5b7d8a;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .top-right-buttons button:hover {
+            background-color: #496472;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-right-buttons">
+        <button onclick="window.location.href='{{ url_for('menu') }}'">Menú</button>
+        <button onclick="window.location.href='{{ url_for('cuenta') }}'">Cuenta</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h2>{{ saludo }}, {{ nombre_medico }}</h2>  <!-- Aquí se muestra el saludo y el nombre completo del médico -->
+            <p>¿Qué estás buscando?</p>
+        </div>
+        <div class="button-grid">
+            <button onclick="window.location.href='{{ url_for('consulta') }}'">Consulta</button>
+            <button onclick="window.location.href='{{ url_for('citas') }}'">Citas</button>
+            {% if g.medico.Tipo_rol == 'administrador' %}
+                <button onclick="window.location.href='{{ url_for('gestionar_medicos') }}'">Médicos</button>
+                <button onclick="window.location.href='{{ url_for('gestionar_pacientes') }}'">Pacientes</button>
+            {% else %}
+                <button onclick="window.location.href='{{ url_for('gestionar_pacientes') }}'">Pacientes</button>
+            {% endif %}
+            <button onclick="window.location.href='{{ url_for('nueva_cita') }}'">Nueva Cita</button>
+            <button onclick="window.location.href='{{ url_for('expediente') }}'">Expediente</button>
+        </div>
+    </div>
+</body>
+</html>

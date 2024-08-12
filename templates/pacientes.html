@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pacientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Gestión de Pacientes</h1>
+
+<!-- Formulario para crear o actualizar pacientes -->
+<form id="pacienteForm">
+    <h2>Registrar/Actualizar Paciente</h2>
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre" required>
+
+    <label for="resultado_exploracion">Resultado de la Exploración:</label>
+    <textarea id="resultado_exploracion" name="resultado_exploracion" rows="4" required></textarea>
+
+    <button type="submit">Guardar Paciente</button>
+</form>
+
+<!-- Tabla para listar pacientes -->
+<h2>Lista de Pacientes</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Resultado de Exploración</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="pacienteList">
+        <!-- Filas de pacientes se generarán aquí -->
+    </tbody>
+</table>
+
+<!-- JavaScript va aquí -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarPacientes();
+
+        document.getElementById('pacienteForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const pacienteID = this.dataset.id;  // Si existe, es una actualización
+            const url = pacienteID ? `/pacientes/${pacienteID}` : '/pacientes';
+            const method = pacienteID ? 'PUT' : 'POST';
+
+            const pacienteData = {
+                Nombre: document.getElementById('nombre').value,
+                Resultado_exploracion: document.getElementById('resultado_exploracion').value
+            };
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(pacienteData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                this.reset();
+                delete this.dataset.id;  // Limpia el ID después de actualizar
+                cargarPacientes();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    function cargarPacientes() {
+        fetch('/pacientes')
+            .then(response => response.json())
+            .then(pacientes => {
+                const pacienteList = document.getElementById('pacienteList');
+                pacienteList.innerHTML = '';
+                pacientes.forEach(paciente => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${paciente.Nombre}</td>
+                        <td>${paciente.Resultado_exploracion}</td>
+                        <td>
+                            <button onclick="editarPaciente(${paciente.PacienteID})">Editar</button>
+                            <button onclick="eliminarPaciente(${paciente.PacienteID})">Eliminar</button>
+                        </td>
+                    `;
+                    pacienteList.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function editarPaciente(pacienteID) {
+        fetch(`/pacientes/${pacienteID}`)
+            .then(response => response.json())
+            .then(paciente => {
+                document.getElementById('nombre').value = paciente.Nombre;
+                document.getElementById('resultado_exploracion').value = paciente.Resultado_exploracion;
+                document.getElementById('pacienteForm').dataset.id = paciente.PacienteID;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function eliminarPaciente(pacienteID) {
+        if (confirm('¿Estás seguro de que deseas eliminar este paciente?')) {
+            fetch(`/pacientes/${pacienteID}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                cargarPacientes();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+
+</body>
+</html>
