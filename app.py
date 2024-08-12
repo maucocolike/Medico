@@ -111,6 +111,7 @@ def gestionar_medicos():
     elif request.method == 'GET':
         # Leer todos los médicos (solo accesible para administradores)
         cursor.execute("SELECT * FROM Medicos")
+    
         medicos = cursor.fetchall()
         return render_template('medicos.html', medicos=medicos)
 
@@ -147,6 +148,23 @@ def gestionar_medico(MedicoID):
         cursor.execute("DELETE FROM Medicos WHERE MedicoID = %s", (MedicoID,))
         conn.commit()
         return jsonify({"mensaje": "Médico eliminado exitosamente"})
+
+#registro de actividades realizadas en el crud de medicos
+#se usa la tabla log_actividades que ya actualice en medico.sql
+def get_logs():
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM log_actividades ORDER BY Fecha DESC")
+    logs = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return logs
+#se crea la ruta actividades (no se como aplicarla a la pagina) 
+#pero yo siento que poniendo un boton que se vaya a esta ruta
+@app.route('/actividades')
+def actividades():
+    logs = get_logs()
+    return render_template('actividades.html', logs=logs)
 
 # CRUD para Pacientes
 @app.route('/pacientes', methods=['GET', 'POST'])
