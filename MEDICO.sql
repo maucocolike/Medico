@@ -91,4 +91,36 @@ CREATE TABLE Expedientes(
 );
 
 -------------------------------------------------------------
+-- ------------    actualizaciones:
+CREATE TABLE log_actividades (
+    LogID INT AUTO_INCREMENT PRIMARY KEY,
+    Descripcion VARCHAR(255) NOT NULL,
+    Fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+-- ------------    trigger medicos    ------------
+DELIMITER $$
+CREATE TRIGGER log_insert_medico
+AFTER INSERT ON Medicos
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_actividades (Descripcion) 
+    VALUES (CONCAT('Se ha registrado el medico: ', NEW.Nombre));
+END$$
+
+CREATE TRIGGER log_update_medico
+AFTER UPDATE ON Medicos
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_actividades (Descripcion) 
+    VALUES (CONCAT('Se ha actualizado el medico con ID: ', NEW.MedicoID));
+END$$
+DELIMITER $$
+CREATE TRIGGER log_delete_medico
+AFTER DELETE ON Medicos
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_actividades (Descripcion) 
+    VALUES (CONCAT('Se ha eliminado el medico con ID: ', OLD.MedicoID));
+END$$
+DELIMITER ;
 
